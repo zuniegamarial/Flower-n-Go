@@ -21,7 +21,7 @@ $total = 0;
 <title>Your Cart</title>
 <style>
 body{background:#0d0a08;color:white;font-family:Arial;padding:40px}
-.cart{max-width:800px;margin:auto}
+.cart{max-width:500px;margin:auto}
 .item{display:flex;margin-bottom:20px;background:#1b120d;padding:15px;border-radius:12px}
 .item img{width:80px;height:80px;object-fit:cover;margin-right:15px}
 .total{margin-top:20px;font-size:20px;color:gold}

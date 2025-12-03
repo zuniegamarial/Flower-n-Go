@@ -298,3 +298,32 @@ body{
   .footer-bottom { flex-direction: column; gap: 10px; }
 }
 
+.orders-table{
+  width:80%;
+  margin:30px auto;
+  border-collapse:collapse;
+  background:#181818;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 0 10px black;
+}
+
+.orders-table th, .orders-table td{
+  padding:12px;
+  text-align:center;
+}
+
+.orders-table th{
+  background:#D4AF37;
+  color:black;
+}
+
+.orders-table tr:nth-child(even){
+  background:#1f1f1f;
+}
+
+.orders-table a{
+  color:#D4AF37;
+  text-decoration:none;
+  font-weight:bold;
+}

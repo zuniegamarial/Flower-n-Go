@@ -20,6 +20,36 @@ body{background:#111;color:white;font-family:sans-serif}
 .item{display:flex;background:#222;padding:12px;margin-bottom:10px;border-radius:8px}
 .item img{width:80px;border-radius:10px;margin-right:12px}
 .total{color:gold;font-size:20px;margin-top:15px}
+.cart-item{
+ display:flex;
+ background:#222;
+ border-radius:10px;
+ margin:10px;
+ padding:15px;
+}
+
+.cart-item img{
+ width:100px;
+ height:100px;
+ object-fit:cover;
+ border-radius:12px;
+ margin-right:15px;
+}
+
+.total{
+ font-size:22px;
+ color:gold;
+ text-align:right;
+ margin-top:15px;
+}
+.checkout{
+ background:gold;
+ border:none;
+ padding:12px;
+ width:100%;
+ border-radius:20px;
+}
+
 </style>
 </head>
 <body>
