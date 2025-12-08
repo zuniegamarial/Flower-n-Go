@@ -388,6 +388,8 @@ while ($item = mysqli_fetch_assoc($cart_result)) {
 </footer>
 
 <script>
+let cartItems = <?php echo json_encode($cart_items); ?>;
+
 function goBack() {
     window.history.back();
 }
@@ -411,6 +413,17 @@ function updateQuantityInput(productId) {
 }
 
 function updateCart(productId, quantity) {
+    // Find the product in cartItems to get its price
+    let product = cartItems.find(item => item.id == productId);
+    if (!product) return;
+    
+    // Calculate new subtotal for this item
+    const newSubtotal = product.price * quantity;
+    
+    // Update the subtotal display for this item immediately (for better UX)
+    document.getElementById('subtotal-' + productId).textContent = '₱' + newSubtotal.toFixed(2);
+    
+    // Send AJAX request to update server
     fetch('update_cart.php', {
         method: 'POST',
         headers: {
@@ -421,19 +434,86 @@ function updateCart(productId, quantity) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            document.getElementById('subtotal-' + productId).textContent = '₱' + data.subtotal.toFixed(2);
+            // Update cart totals from server response
             document.getElementById('cartSubtotal').textContent = '₱' + data.cartTotal.toFixed(2);
             document.getElementById('cartTotal').textContent = '₱' + (data.cartTotal + 200).toFixed(2);
+            
+            // Also update the local cartItems array
+            const itemIndex = cartItems.findIndex(item => item.id == productId);
+            if (itemIndex !== -1) {
+                cartItems[itemIndex].quantity = quantity;
+                cartItems[itemIndex].subtotal = newSubtotal;
+            }
+        } else {
+            alert(data.message || 'Error updating cart');
+            // Reload to get actual state
+            location.reload();
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Network error. Please check your connection.');
+        // Revert the display to original
+        location.reload();
     });
 }
 
 function removeItem(productId) {
     if (confirm('Remove this item from cart?')) {
-        window.location.href = 'remove_cart.php?id=' + productId;
+        fetch('remove_cart.php?id=' + productId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the item from DOM
+                document.getElementById('item-' + productId).remove();
+                // Update totals
+                document.getElementById('cartSubtotal').textContent = '₱' + data.cartTotal.toFixed(2);
+                document.getElementById('cartTotal').textContent = '₱' + (data.cartTotal + 200).toFixed(2);
+                
+                // Update cartItems array
+                cartItems = cartItems.filter(item => item.id != productId);
+                
+                // If cart is empty, reload page to show empty cart message
+                if (cartItems.length === 0) {
+                    location.reload();
+                }
+            } else {
+                alert('Error removing item');
+            }
+        });
     }
 }
+function updateTotals() {
+    let cartSubtotal = 0;
+    
+    // Calculate subtotal from all items
+    cartItems.forEach(item => {
+        const input = document.getElementById('qty-' + item.id);
+        if (input) {
+            const quantity = parseInt(input.value);
+            const itemSubtotal = item.price * quantity;
+            cartSubtotal += itemSubtotal;
+            
+            // Update individual item subtotal
+            document.getElementById('subtotal-' + item.id).textContent = '₱' + itemSubtotal.toFixed(2);
+        }
+    });
+    
+    // Update cart totals
+    document.getElementById('cartSubtotal').textContent = '₱' + cartSubtotal.toFixed(2);
+    document.getElementById('cartTotal').textContent = '₱' + (cartSubtotal + 200).toFixed(2);
+}
 
+// Modify updateQuantity function to use client-side calculation:
+function updateQuantity(productId, change) {
+    const input = document.getElementById('qty-' + productId);
+    let newQty = parseInt(input.value) + change;
+    if (newQty < 1) newQty = 1;
+    
+    input.value = newQty;
+    updateTotals(); // Update UI immediately
+    updateCartOnServer(productId, newQty); // Update server in background
+}
 function proceedToCheckout() {
     window.location.href = 'checkout_final.php';
 }

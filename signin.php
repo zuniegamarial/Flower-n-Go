@@ -2,10 +2,9 @@
 session_start();
 include "db.php";
 
-
 // for remember Login
 if(isset($_COOKIE['remember_user'])){
-    $_SESSION['user'] = $_COOKIE['remember_user'];
+    $_SESSION['user_id'] = $_COOKIE['remember_user'];
 }
 
 $error = "";
@@ -24,6 +23,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($user = mysqli_fetch_assoc($result)) {
         if (password_verify($password, $user['password'])) {
             $_SESSION["user_id"] = $user["id"];
+            
+            // Set cookie if remember me is checked
+            if(isset($_POST['remember'])) {
+                setcookie("remember_user", $user["id"], time() + (86400 * 7), "/"); // 7 days
+            } else {
+                // Clear the cookie if not checked
+                setcookie("remember_user", "", time() - 3600, "/");
+            }
+            
             header("Location: dashboard.php");
             exit();
         } else {
@@ -74,10 +82,15 @@ body {
     font-weight:bold;
 }
 
+.password-wrapper {
+    position: relative;
+    margin-top: 10px;
+}
+
 .toggle-password {
     position: absolute;
     right: 15px;
-    top: 30%;
+    top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
     font-size: 15px;
@@ -87,14 +100,8 @@ body {
 }
 
 .toggle-password:hover {
-    opacity: 7;
+    opacity: 1;
 }
-
-/* For correct alignment */
-.password-wrapper {
-    position: relative;
-}
-
 
 /* FORM BOX */
 .form-box {
@@ -115,7 +122,8 @@ h2 { margin-bottom:6px; }
 }
 
 /* INPUTS */
-input {
+input[type="email"],
+input[type="password"] {
     width:100%;
     padding:12px;
     margin-top:10px;
@@ -123,6 +131,21 @@ input {
     border:none;
     border-radius:6px;
     font-size:14px;
+}
+
+/* REMEMBER ME SECTION */
+.remember-me {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+}
+
+.remember-me input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    margin-right: 8px;
+    transform: scale(1.1);
 }
 
 /* BUTTON */
@@ -183,15 +206,15 @@ a:hover { text-decoration:underline; }
 
             <input type="email" name="email" placeholder="Email" required>
 
-           <div class="password-wrapper">
-          <input type="password" id="password" name="password" placeholder="Enter your password" required>
-          <span class="toggle-password" onclick="togglePassword()">👁️</span>
-          <label style="font-size:13px;">
-            <input type="checkbox" name="remember"> Remember me
-            </label>
+            <div class="password-wrapper">
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <span class="toggle-password" onclick="togglePassword()">👁️</span>
+            </div>
 
-      </div>
-
+            <div class="remember-me">
+                <input type="checkbox" name="remember" id="remember">
+                <label for="remember">Remember me</label>
+            </div>
 
             <div class="links"> 
                 <a href="forgot.php">Forgot password?</a>
@@ -220,17 +243,13 @@ function togglePassword(){
   }
 }
 
-// validation (safe mode)
+// form validation
 const form = document.querySelector("form");
 
 if(form){
   form.addEventListener('submit', function(e){
     const email = this.querySelector('input[type="email"]').value.trim();
     const pw = document.getElementById('password').value.trim();
-
-    if(isset($_POST['remember'])){
-    setcookie("remember_user", $user['name'], time() + (86400 * 7), "/"); // 7 days
-}
 
     if(!email || !pw){
       e.preventDefault();
@@ -239,7 +258,6 @@ if(form){
   });
 }
 </script>
-
 
 </body>
 </html>

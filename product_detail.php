@@ -375,6 +375,94 @@ $discount_percent = 20;
     }
 }
 
+/* POPUP CONFIRMATION */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.popup-box {
+    background: #1b120d;
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    border: 2px solid #D4AF37;
+    animation: popupShow 0.3s ease;
+}
+
+@keyframes popupShow {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.popup-icon {
+    font-size: 60px;
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+.popup-title {
+    color: #D4AF37;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.popup-message {
+    color: #bfbfbf;
+    margin-bottom: 25px;
+}
+
+.popup-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.popup-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.continue-btn {
+    background: #666;
+    color: white;
+}
+
+.continue-btn:hover {
+    background: #777;
+}
+
+.checkout-btn {
+    background: #D4AF37;
+    color: #000;
+    text-decoration: none;
+    text-align: center;
+}
+
+.checkout-btn:hover {
+    background: #ffdc73;
+}
+
+@media (max-width: 600px) {
+    .popup-buttons {
+        flex-direction: column;
+    }
+}
+
 @media (max-width: 600px) {
     .related-grid {
         grid-template-columns: 1fr;
@@ -515,23 +603,12 @@ $discount_percent = 20;
             
             <!-- ACTION BUTTONS -->
             <div class="action-buttons">
-                <form method="POST" action="add_to_cart.php" class="addCartForm">
+                <form method="POST" class="addCartForm" data-product-id="<?=$product['id']?>">
                     <input type="hidden" name="product_id" value="<?=$product['id']?>">
                     <input type="hidden" name="quantity" id="formQuantity" value="1">
                     <button type="submit" class="action-btn btn-cart">Add to Cart</button>
                 </form>
                 <button class="action-btn btn-buy" onclick="window.location.href='checkout_final.php'">Buy Now</button>
-            </div>
-            
-            <!-- ADDITIONAL INFO -->
-            <div class="additional-info">
-                <h3>📝 Additional Information</h3>
-                <p style="color:#bfbfbf;line-height:1.6;">
-                    <strong>Personal Message:</strong> Add a personalized message during checkout.<br>
-                    <strong>Seasonal Variations:</strong> Components may vary slightly due to seasonal availability.<br>
-                    <strong>Care Instructions:</strong> Detailed care guide included with every order.<br>
-                    <strong>Freshness Guarantee:</strong> If not satisfied, contact us within 24 hours.
-                </p>
             </div>
         </div>
     </div>
@@ -558,6 +635,23 @@ $discount_percent = 20;
         </div>
     <?php endif; ?>
 </div>
+<!-- POPUP CONFIRMATION -->
+<div id="popup" class="popup-overlay">
+    <div class="popup-box">
+        <div class="popup-icon">✓</div>
+        <h3 class="popup-title">Item Added to Cart!</h3>
+        <p class="popup-message">Your item has been successfully added to your shopping cart.</p>
+        
+        <div class="popup-buttons">
+            <button class="popup-btn continue-btn" onclick="closePopup()">Continue Shopping</button>
+            <a href="view_cart.php" class="popup-btn checkout-btn">View Cart</a>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <a href="checkout_final.php" style="color:#D4AF37; text-decoration: none;">Proceed to Checkout →</a>
+        </div>
+    </div>
+</div>  
 
 <script>
 const productPrice = <?=$product['price']?>;
@@ -603,6 +697,50 @@ document.querySelectorAll('.time-option').forEach(option => {
         this.classList.add('selected');
         document.getElementById('selectedTime').value = this.dataset.time;
     });
+});
+
+// Add to cart with AJAX
+document.querySelector('.addCartForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    // Get selected date and time
+    const selectedDate = document.getElementById('selectedDate').value;
+    const selectedTime = document.getElementById('selectedTime').value;
+    
+    // Add delivery options to form data
+    formData.append('delivery_date', selectedDate);
+    formData.append('delivery_time', selectedTime);
+    
+    fetch('add_to_cart.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(result => {
+        if (result === 'success') {
+            document.getElementById('popup').style.display = 'flex';
+        } else {
+            alert('Error adding to cart. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Network error. Please check your connection.');
+    });
+});
+
+// Close popup
+function closePopup() {
+    document.getElementById('popup').style.display = 'none';
+}
+
+// Close popup when clicking outside
+document.getElementById('popup').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePopup();
+    }
 });
 </script>
 
