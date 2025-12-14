@@ -1,6 +1,7 @@
 <?php
 include 'inclusion/header.php';
 include 'config.php';
+include "db.php";
 
 // Get statistics
 $stats = [];
