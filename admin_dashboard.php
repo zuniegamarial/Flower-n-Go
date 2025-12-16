@@ -8,7 +8,7 @@ $user = mysqli_fetch_assoc($user_query);
 if ($user['user_type'] != 'admin') header("Location: admin_dashboard.php");
 
 $orders_count = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as count FROM orders"))['count'] ?? 0;
-$total_sales = mysqli_fetch_assoc(mysqli_query($conn, "SELECT SUM(total_amount) as total FROM orders WHERE status != 'cancelled'"))['total'] ?? 0;
+$total_sales = mysqli_fetch_assoc(mysqli_query($conn, "SELECT SUM(total) as total FROM orders WHERE status != 'cancelled'"))['total'] ?? 0;
 $customers_count = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as count FROM users"))['count'] ?? 0;
 $products_count = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as count FROM products WHERE is_active = 1"))['count'] ?? 0;
 
@@ -54,7 +54,7 @@ if (isset($_GET['stat'])) {
     header('Content-Type: application/json'); echo json_encode($response); exit();
 }
 
-$recent_orders = mysqli_query($conn, "SELECT o.id, o.total_amount, o.status, o.created_at, CASE o.id WHEN 1 THEN 'Sandy Murillo' WHEN 2 THEN 'Abby Llaguno' WHEN 3 THEN 'Mary Franxine Nicol' ELSE u.name END as customer_name FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC LIMIT 5");
+$recent_orders = mysqli_query($conn, "SELECT o.id, o.total, o.status, o.created_at, CASE o.id WHEN 1 THEN 'Sandy Murillo' WHEN 2 THEN 'Abby Llaguno' WHEN 3 THEN 'Mary Franxine Nicol' ELSE u.name END as customer_name FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC LIMIT 5");
 $top_products = mysqli_query($conn, "SELECT p.name, p.price, p.image, p.stock, COALESCE(SUM(oi.quantity),0) as sold, p.description FROM products p LEFT JOIN order_items oi ON p.id = oi.product_id LEFT JOIN orders o ON oi.order_id = o.id AND o.status != 'cancelled' WHERE p.is_active = 1 GROUP BY p.id ORDER BY sold DESC, p.name ASC LIMIT 4");
 $low_stock = mysqli_query($conn, "SELECT name, stock, price FROM products WHERE stock <= 5 AND is_active = 1 ORDER BY stock ASC LIMIT 5");
 
@@ -246,7 +246,7 @@ $low_stock_notification_count = count($low_stock_data);
                             <td>#<?php echo $order['id']; ?></td>
                             <td><?php echo htmlspecialchars($order['customer_name']?:'Guest'); ?></td>
                             <td><?php echo date('M d',strtotime($order['created_at'])); ?></td>
-                            <td>₱<?php echo number_format($order['total_amount'],2); ?></td>
+                            <td>₱<?php echo number_format($order['total'],2); ?></td>
                             <td><span class="badge <?php echo $status_class; ?>"><?php echo ucfirst($order['status']?:'pending'); ?></span></td>
                         </tr>
                         <?php endwhile; else: ?>
