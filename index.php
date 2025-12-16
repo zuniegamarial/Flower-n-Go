@@ -86,7 +86,7 @@
 </article>
 
 <article class="product-card" onclick="location.href='order.php'">
-<img src="Tulips.jpg">  
+<img src="tulips.jpg">  
 <span class="tag new">NEW</span>
 <div class="product-info">
 <h3>TULIPS</h3>
