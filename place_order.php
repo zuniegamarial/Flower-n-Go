@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach($cart_items as $item) {
                 $product_id = $item['id'];
                 $quantity = $item['quantity'];
-                $price = $item['price'];
+                $price = $item['price'];    
                 $item_total = $item['subtotal'];
                 
                 // Insert order item

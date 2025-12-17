@@ -50,7 +50,7 @@ document.getElementById("newsletterForm").addEventListener("submit", function(e)
 });
 
 // Theme Toggle
-const Toggle = document.querySelector(".theme-toggle");
+const toggle = document.querySelector(".theme-toggle");
 toggle.addEventListener("click", ()=>{
   document.body.classList.toggle("light-mode");
 
@@ -61,7 +61,7 @@ toggle.addEventListener("click", ()=>{
 });
 
 // theme toggle (if you included theme toggle earlier)
-const Toggle = document.querySelector(".theme-toggle");
+const toggle = document.querySelector(".theme-toggle");
 if(toggle){
   toggle.addEventListener("click", ()=>{
     document.body.classList.toggle("light-mode");

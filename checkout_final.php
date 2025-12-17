@@ -649,8 +649,6 @@ document.querySelectorAll('.payment-method').forEach(method => {
 
 // Clear direct order if user leaves page
 window.addEventListener('beforeunload', function() {
-    // You might want to keep this, or remove it to persist the direct order
-    // fetch('clear_direct_order.php'); // Optional: create this file to clear session
 });
 </script>
 
