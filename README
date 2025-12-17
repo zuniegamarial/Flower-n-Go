@@ -1,0 +1,96 @@
+# Database Error Fix Documentation
+Flower Shop Order System
+
+## The Problem
+Our checkout system kept crashing with this error:
+
+Fatal error: Uncaught mysqli_sql_exception: Duplicate entry '0' for key 'PRIMARY' in
+ C:\xampp\htdocs\fng2\place_order.php:110 Stack trace: #0 C:\xampp\htdocs\fng2\place_order.php(110): 
+ mysqli_query(Object(mysqli), 'INSERT INTO ord...') #1 {main} thrown in C:\xampp\htdocs\fng2\place_order.php on line 110
+
+
+Basically, every time someone tries to buy flowers, the system would die at the payment step. Not great for business.
+
+## What Was Actually Happening
+
+I spent hours looking at the PHP code in `place_order.php`, thinking the bug was there. Checked all the variables, the database connections, 
+everything. The error said line 110, so I kept staring at that line trying to figure out what was wrong.
+
+Turns out I was looking in the wrong place completely.
+
+The real problem was in the database itself. Here's what was broken:
+
+1. The order_items table (where we save what people bought) had its ID column set up wrong
+2. It was supposed to automatically create new ID numbers for each item, but it wasn't doing that
+3. There was already an item in the database with ID = 0
+4. Every new order tried to use ID = 0 too, and you can't have two things with the same ID
+
+So it was like trying to give two students the same student number - the system just rejects it.
+
+## How I Fixed It
+
+After finally realizing the database was the problem, I fixed it with this one SQL command:
+
+sql
+ALTER TABLE `order_items` MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+
+What that does:
+
+Makes the ID column automatically create new numbers (AUTO_INCREMENT)
+
+Starts counting from 101 instead of 1, so it doesn't clash with existing items
+
+I chose 101 because the highest existing ID was 23, so 101 gives us plenty of room.
+
+Why This Works
+Before:
+
+New order item → System tries ID = 0 → "Hey, ID 0 already exists!" → ERROR
+
+After:
+
+New order item → System automatically gives it ID = 101, 102, 103... → No conflicts → Everything works
+
+What I Learned
+Error messages lie (sort of) - Just because it says the problem is on line 110, doesn't mean the solution is there
+
+Check the database too - When PHP has database errors, the problem might be in the database setup, not the PHP code
+
+AUTO_INCREMENT is important - If you want the database to automatically make new IDs, you have to actually tell it to do that
+
+Look at existing data - Sometimes old data can cause new problems
+
+#How to Avoid This in the Future
+1. When creating tables that need unique IDs, always add AUTO_INCREMENT:
+-- Do this:
+CREATE TABLE example (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(100)
+);
+
+-- Not this:
+CREATE TABLE example (
+  id INT PRIMARY KEY,
+  name VARCHAR(100)
+);
+
+2. Test your forms with real data early, don't wait until people are trying to buy things
+
+3. When you get database errors, check:
+The table structure
+What data is already in the table
+How the table was originally set up
+
+#Status Now
+Orders are working
+No more "duplicate entry" errors
+Customers can buy flowers without problems
+System automatically handles ID creation
+
+The fix took one line of SQL but solved a major problem that was stopping all sales. 
+#Sometimes the smallest things cause the biggest headaches hahaha.
+
+Document updated: December 2025
+System: Flower Shop E-commerce
+Fixed by: Marial Zuniega
+
