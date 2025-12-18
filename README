@@ -13,12 +13,11 @@ Basically, every time someone tries to buy flowers, the system would die at the 
 
 ## What Was Actually Happening
 
-I spent hours looking at the PHP code in `place_order.php`, thinking the bug was there. Checked all the variables, the database connections, 
-everything. The error said line 110, so I kept staring at that line trying to figure out what was wrong.
+After presenting our system, our group spent hours searching for an error in the PHP code of `place_order.php`. Convinced it was a bug in the script, we examined every variable and database connection. The error log pointed to line 110, so we fixed our attention there, trying over and over to identify the problem.
 
-Turns out I was looking in the wrong place completely.
+We even revisited the database but couldn’t pinpoint where the issue was hidden. It turns out the error really was in the database all along—and Marial was the one who figured it out.
 
-The real problem was in the database itself. Here's what was broken:
+Here's what was broken:
 
 1. The order_items table (where we save what people bought) had its ID column set up wrong
 2. It was supposed to automatically create new ID numbers for each item, but it wasn't doing that
@@ -93,4 +92,4 @@ The fix took one line of SQL but solved a major problem that was stopping all sa
 Document updated: December 2025
 System: Flower Shop E-commerce
 Fixed by: Marial Zuniega
-
+Members: Abby Llaguno, Sandy Murillo, Mary Franxine Nicol
